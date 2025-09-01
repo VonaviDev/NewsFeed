@@ -24,7 +24,9 @@ final class NewsRepository: NewsRepositoryProtocol {
     }
 
     func fetchPage(page: Int, pageSize: Int) async throws -> NewsPage {
-        let url = NewsEndpoint.page(page, pageSize: pageSize).url
+        guard let url = NewsEndpoint.page(page, pageSize: pageSize).url else {
+            throw URLError(.badURL)
+        }
         let dto: NewsPageDTO = try await client.get(url)
         let items = (dto.news ?? []).compactMap { Self.map($0) }
         let total = dto.totalCount ?? 0
@@ -32,7 +34,7 @@ final class NewsRepository: NewsRepositoryProtocol {
     }
 
     // MARK: - Mapping
-    
+
     private static let isoWithFractional: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -52,7 +54,7 @@ final class NewsRepository: NewsRepositoryProtocol {
         f.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXXXX"
         return f
     }()
-    
+
     private static func parseDate(_ s: String?) -> Date {
         guard let s, !s.isEmpty else { return Date() }
         if let d = isoWithFractional.date(from: s) { return d }
@@ -64,9 +66,15 @@ final class NewsRepository: NewsRepositoryProtocol {
     private static func map(_ d: NewsDTO) -> NewsItem? {
         let published = parseDate(d.publishedDate)
 
-        let url = d.url.flatMap { URL(string: $0, relativeTo: APIConfig.baseWeb)?.absoluteURL }
-        let fullUrl = d.fullUrl.flatMap { URL(string: $0, relativeTo: APIConfig.baseWeb)?.absoluteURL }
-        let imageURL = d.titleImageUrl.flatMap { URL(string: $0, relativeTo: APIConfig.baseWeb)?.absoluteURL }
+        let url = d.url.flatMap {
+            URL(string: $0, relativeTo: APIConfig.baseWeb)?.absoluteURL
+        }
+        let fullUrl = d.fullUrl.flatMap {
+            URL(string: $0, relativeTo: APIConfig.baseWeb)?.absoluteURL
+        }
+        let imageURL = d.titleImageUrl.flatMap {
+            URL(string: $0, relativeTo: APIConfig.baseWeb)?.absoluteURL
+        }
 
         return NewsItem(
             id: d.id,
@@ -79,7 +87,7 @@ final class NewsRepository: NewsRepositoryProtocol {
             category: normalized(d.categoryType)
         )
     }
-    
+
     private static func normalized(_ s: String?) -> String? {
         guard let s else { return nil }
         let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)

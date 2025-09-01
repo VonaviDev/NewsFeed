@@ -13,29 +13,25 @@ enum NewsEndpoint {
 
 struct APIConfig {
     /// Базовый адрес API
-    static var baseAPI: URL = {
-        guard let url = URL(string: "https://webapi.autodoc.ru") else {
-            fatalError("Invalid API base URL")
-        }
+    static var baseAPI: URL? = {
+        let url = URL(string: "https://webapi.autodoc.ru")
         return url
     }()
     
     /// Адрес для web‑ссылок
-    static var baseWeb: URL = {
-        guard let url = URL(string: "https://www.autodoc.ru/") else {
-            fatalError("Invalid web base URL")
-        }
+    static var baseWeb: URL? = {
+        let url = URL(string: "https://www.autodoc.ru/")
         return url
     }()
 }
 
 extension NewsEndpoint {
-    var url: URL {
+    var url: URL? {
         switch self {
         case .page(let page, let pageSize):
-            var u = APIConfig.baseAPI
-            u.append(path: "/api/news/\(page)/\(pageSize)")
-            return u
+            var url = APIConfig.baseAPI
+            url?.append(path: "/api/news/\(page)/\(pageSize)")
+            return url
         }
     }
 }
