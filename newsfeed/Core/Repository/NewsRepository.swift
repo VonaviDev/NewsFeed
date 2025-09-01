@@ -55,12 +55,12 @@ final class NewsRepository: NewsRepositoryProtocol {
         return f
     }()
 
-    private static func parseDate(_ s: String?) -> Date {
-        guard let s, !s.isEmpty else { return Date() }
+    private static func parseDate(_ s: String?) -> Date? {
+        guard let s, !s.isEmpty else { return nil }
         if let d = isoWithFractional.date(from: s) { return d }
         if let d = isoNoFractional.date(from: s) { return d }
         if let d = rfc3339.date(from: s) { return d }
-        return Date()
+        return nil
     }
 
     private static func map(_ d: NewsDTO) -> NewsItem? {
