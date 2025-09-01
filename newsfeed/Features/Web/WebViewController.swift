@@ -105,9 +105,9 @@ final class WebViewController: UIViewController {
             self.progressView.isHidden = progress >= 1.0
             self.progressView.setProgress(progress, animated: true)
             if progress >= 1.0 {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                    self.progressView.isHidden = true
-                    self.progressView.progress = 0
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+                    self?.progressView.isHidden = true
+                    self?.progressView.progress = 0
                 }
             }
         }
